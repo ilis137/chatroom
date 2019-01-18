@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Anonymous message board</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
@@ -13,8 +14,11 @@
 </head>
 
 <body>
+    <ul class="list-group fixed-top">
+
+    </ul>
     <div class="input-group fixed-bottom">
-        <input type="text" class="form-control" placeholder="send message...">
+        <input type="text" class="form-control" id="message" placeholder="send message...">
         <div class="input-group-append">
             <button class="btn btn-primary" type="button">Submit</button>
         </div>
@@ -22,7 +26,34 @@
 
 </body>
 <script>
-    var socket = io();
+    const socket = io();
+
+    $(function() {
+        $("button").click(function(e) {
+            socket.emit("chat message", $("#message").val())
+
+            $("#message").val("")
+
+        })
+        $("body").keydown(function(e) {
+            if (e.which == 13 && $("#message").val() !== "") {
+                socket.emit("chat message", $("#message").val())
+
+                $("#message").val("")
+
+            }
+        })
+        socket.on("chat message", function(msg) {
+            $("body").append($("<li class='list-group-item'>").text(msg))
+        })
+        socket.on("disconnected", function(msg) {
+            $("body").append($("<p class='text-center text-muted h6'>").text(msg))
+        })
+
+        socket.on("connected", function(msg) {
+            $("body").append($("<p class='text-center text-muted h6'>").text(msg))
+        })
+    })
 </script>
 
 </html>
