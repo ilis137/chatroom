@@ -4,6 +4,8 @@ const http = require("http").Server(app)
 const io = require("socket.io")(http)
 
 
+var numUsers = 0
+
 app.use(express.static(__dirname + "/"))
 
 app.get("/", (req, res) => {
@@ -12,13 +14,35 @@ app.get("/", (req, res) => {
 
 io.on("connection", (socket) => {
     socket.on("chat message", (msg) => {
-        console.log("message: " + msg)
-        io.emit("chat message", msg)
-    })
-    socket.on('disconnect', function() {
-        io.emit("disconnected", "user disconnected")
-    });
 
+        console.log("message: " + msg)
+        socket.broadcast.emit("chat message", {
+            msg,
+            username: socket.username
+        })
+    })
+    socket.on('disconnect', () => {
+        if (numUsers > 0)
+            numUsers--;
+
+        io.emit("disconnected", {
+            numUsers,
+            username: socket.username
+        })
+    });
+    socket.on("add user", (username) => {
+            console.log(username)
+            socket.username = username;
+            numUsers++
+            socket.emit("login", {
+                numUsers: numUsers
+            })
+            socket.broadcast.emit("user joined", {
+                numUsers,
+                username: socket.username
+            })
+        })
+        //console.log(socket)
     io.emit("connected", "user connected")
 
 })
