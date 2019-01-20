@@ -21,6 +21,14 @@ io.on("connection", (socket) => {
             username: socket.username
         })
     })
+    socket.on("typing", (username) => {
+
+
+        socket.broadcast.emit("typing", {
+            nickname: username,
+
+        })
+    })
     socket.on('disconnect', () => {
         if (numUsers > 0)
             numUsers--;
