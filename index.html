@@ -10,12 +10,12 @@
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
-    <!-- <script src="main.js"></script> -->
+    <script src="main.js"></script>
 </head>
 <style>
     html,
     body {
-        height: 100%;
+        height: 100vh;
         margin: 0;
         padding: 0;
     }
@@ -37,7 +37,17 @@
     }
     
     .chat-message {
-        display: none
+        display: none;
+        height: 100%;
+        overflow: auto;
+    }
+    
+    .messages-container {
+        overflow: auto;
+    }
+    
+    .messages {
+        height: auto;
     }
 </style>
 
@@ -50,10 +60,14 @@
     </div>
 
     <div class="chat-message">
-        <ul class="list-group fixed-top">
+        <div class="messages-container ">
+            <ul class=" list-group messages"></ul>
+            <div class="text-center text-muted feedback"></div>
 
-        </ul>
-        <div class="input-group fixed-bottom">
+        </div>
+
+        <div class="input-group fixed-bottom" style="z-index:1400">
+
             <input type="text" class="form-control" id="message" placeholder="send message...">
             <div class="input-group-append">
                 <button class="btn btn-primary" type="button">Submit</button>
@@ -64,64 +78,6 @@
 
 </body>
 <script>
-    const socket = io();
-    var nickname;
-    $(function() {
-
-
-        $("button").click(function(e) {
-            socket.emit("chat message", $("#message").val())
-            $("ul").append($("<li class='list-group-item'>").text(nickname + " : " + $("#message").val()))
-            $("#message").val("")
-
-        })
-        $("body").keydown(function(e) {
-            if (e.which == 13 && $("#message").val() !== "") {
-                socket.emit("chat message", $("#message").val())
-                $("ul").append($("<li class='list-group-item'>").text(nickname + " : " + $("#message").val()))
-
-            }
-        })
-
-        $(".login-page").keydown(function(e) {
-            if (e.which == 13 && $(".nickname").val() !== "") {
-                $(".login-page").fadeOut()
-                $(".chat-message").show()
-
-                nickname = $(".nickname").val()
-                $(".login-page").off('click');
-                socket.emit("add user", nickname)
-            }
-        })
-
-
-        socket.on("chat message", function(data) {
-            if (nickname)
-                $("ul").append($("<li class='list-group-item'>").text(data.username + " : " + data.msg))
-        })
-
-        socket.on("user joined", function(data) {
-            if (data.numUsers && nickname) {
-                $("ul").append($("<li class='list-group-item'>").text(data.username + " joined the room"))
-                $("ul").append($("<li class='list-group-item'>").text(data.numUsers + " in the room"))
-            }
-
-        })
-
-        socket.on("login", function(data) {
-            if (data.numUsers)
-                $("ul").append($("<li class='list-group-item'>").text(data.numUsers + " in the room"))
-        })
-        socket.on("disconnected", function(data) {
-            if (nickname) {
-                $("ul").append($("<li class='list-group-item'>").text(data.username + " left the room"))
-                $("ul").append($("<li class='list-group-item'>").text(data.numUsers + " in the room"))
-            }
-
-        })
-
-
-    })
 </script>
 
 </html>
